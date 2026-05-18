@@ -59,18 +59,6 @@ La mecánica interna se basa en tres pilares:
 
 ## UML del patrón
 
-### UML ASCII
-```text
-+---------------------------+
-|         Singleton         |
-+---------------------------+
-| - instance: Singleton     | [Estático]
-+---------------------------+
-| - Singleton()             | [Privado]
-| + getInstance(): Singleton| [Estático]
-+---------------------------+
-```
-
 ### UML Mermaid
 ```mermaid
 classDiagram
