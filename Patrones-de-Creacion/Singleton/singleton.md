@@ -82,85 +82,34 @@ classDiagram
     note for Singleton "Si instance es null:\n  instance = new Singleton()\nReturn instance"
 ```
 
-## Implementación en Java
+## Implementación esencial en Java
 
-### 1. Lazy Initialization (No Thread-Safe)
-Ideal para entornos monohilo donde el recurso es costoso y solo debe crearse si se usa.
 ```java
-public class SingletonLazy {
-    private static SingletonLazy instance;
+public class Singleton {
+    // Atributo estático que guarda la instancia única
+    private static Singleton instance;
 
-    private SingletonLazy() {}
+    // Constructor privado para evitar instanciación externa
+    private Singleton() {}
 
-    public static SingletonLazy getInstance() {
+    // Método público para obtener la instancia
+    public static Singleton getInstance() {
         if (instance == null) {
-            instance = new SingletonLazy();
+            instance = new Singleton();
         }
         return instance;
-    }
-}
-```
-
-### 2. Thread-Safe (Double-Checked Locking)
-La forma clásica y robusta para entornos multihilo.
-```java
-public class SingletonThreadSafe {
-    // volatile asegura visibilidad entre hilos
-    private static volatile SingletonThreadSafe instance;
-
-    private SingletonThreadSafe() {}
-
-    public static SingletonThreadSafe getInstance() {
-        if (instance == null) { // Primer check (sin bloqueo)
-            synchronized (SingletonThreadSafe.class) {
-                if (instance == null) { // Segundo check (con bloqueo)
-                    instance = new SingletonThreadSafe();
-                }
-            }
-        }
-        return instance;
-    }
-}
-```
-
-### 3. El enfoque moderno: Enum Singleton
-Es la implementación recomendada por Joshua Bloch (Effective Java). Proporciona protección gratuita contra la serialización y ataques de reflexión.
-```java
-public enum SingletonEnum {
-    INSTANCE;
-    
-    public void doSomething() {
-        // Lógica del negocio
     }
 }
 ```
 
 ## Relación con SOLID y POO
-
-1. **Single Responsibility Principle (SRP):** Aquí hay un **trade-off**. Técnicamente, la clase viola el SRP porque hace dos cosas: realiza su lógica de negocio y además gestiona su propio ciclo de vida. Sin embargo, en patrones de diseño, esta es una decisión deliberada para garantizar la unicidad.
-2. **Encapsulamiento:** Es el núcleo del patrón. Ocultamos el *cómo* y el *cuándo* se crea el objeto.
-3. **Abstracción:** El cliente no necesita saber cómo se gestiona la instancia, solo confía en el contrato de `getInstance()`.
+1. **Encapsulamiento:** Protege el proceso de creación.
+2. **Abstracción:** El cliente solo interactúa con `getInstance()`.
 
 ## Trade-offs (Ventajas y Desventajas)
-
-### Ventajas:
-- **Control estricto de acceso:** Punto único de entrada.
-- **Reducción del espacio de nombres:** Evita variables globales que ensucian el código.
-- **Lazy Loading:** El objeto solo se crea cuando es estrictamente necesario.
-
-### Desventajas:
-- **Dificultad en Pruebas Unitarias:** El estado global es el enemigo de los tests. No puedes resetear fácilmente la instancia entre pruebas, lo que genera dependencias entre tests.
-- **Oculta Dependencias:** Al llamar a `Singleton.getInstance()` dentro de un método, la dependencia no es explícita en el constructor (genera acoplamiento oculto).
-- **Problemas en Sistemas Distribuidos:** En entornos con múltiples JVMs o ClassLoaders, puedes terminar con múltiples "Singletons".
+- **Ventaja:** Punto de acceso global y control de instancia única.
+- **Desventaja:** Dificulta las pruebas unitarias por el estado global oculto.
 
 ## Cuándo usarlo y cuándo NO
-
-### Úsalo cuando:
-- El recurso debe ser **estrictamente único** (ej. Driver de hardware).
-- Necesitas un punto de acceso global que sea más controlado que una variable global.
-- Quieres implementar otros patrones como **Abstract Factory** o **Builder** que suelen ser Singletons.
-
-### NO lo uses cuando:
-- Solo quieres pasar información entre clases (usa Inyección de Dependencias).
-- Te importa mucho la "testeabilidad" del código (considera usar un contenedor de DI como Spring o Dagger que gestione el ciclo de vida por ti).
-- La clase tiene estado que cambia frecuentemente y es accedido por muchos hilos (puede convertirse en un cuello de botella).
+- **Usar:** Para recursos que deben ser únicos (ej. Logger o Configuración).
+- **No usar:** Si se puede resolver mediante inyección de dependencias.
